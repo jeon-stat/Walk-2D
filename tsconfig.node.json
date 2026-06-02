@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts", ".github/**/*.ts"]
+  "include": ["vite.config.js", ".github/**/*.ts"]
 }

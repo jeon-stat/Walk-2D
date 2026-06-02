@@ -39,9 +39,10 @@ npm run preview
 
 ## GitHub Pages 배포
 
-- `vite.config.ts`에 `base: "/Walk-2D/"` 설정
-- `main` 브랜치 push 시 GitHub Actions 자동 배포
-- `.github/workflows/deploy.yml`에 Pages 워크플로 구성
+- `vite.config.js`에 `base: "/Walk-2D/"` 설정
+- `main` 브랜치 push 시 GitHub Actions가 `docs/`를 갱신하고 `gh-pages` 브랜치로 배포
+- `docs/`는 `npm run export:web`로 `dist/`에서 자동 동기화됨
+- Pages source를 `Deploy from a branch`로 쓰는 경우 `gh-pages` 브랜치 또는 `main/docs` 방식 중 하나를 선택하면 됩니다
 
 ## 폴더 구조
 
@@ -52,6 +53,7 @@ src/
     character/
       placeholders/
   components/
+  docs/
   modules/
     character/
       components/
@@ -76,6 +78,8 @@ src/
   screens/
   shared/
   styles/
+tools/
+  sync-pages.mjs
 ```
 
 ## 2D 캐릭터 파츠 추가
@@ -144,3 +148,4 @@ src/
 1. `main` 브랜치에 push
 2. GitHub Actions `Deploy to GitHub Pages` 실행 확인
 3. 배포 완료 후 `https://jeon-stat.github.io/Walk-2D/` 접속
+4. 브랜치 배포를 쓰는 경우 `gh-pages` 브랜치 또는 `main/docs`를 Pages source로 선택
