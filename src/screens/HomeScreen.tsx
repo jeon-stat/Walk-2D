@@ -1,107 +1,223 @@
-import { CharacterViewer } from "../modules/character/components/CharacterViewer";
-import { useCharacterStore } from "../modules/character/characterStore";
-import { useDialogueStore } from "../modules/dialogue/dialogueStore";
-import { useInventoryStore } from "../modules/inventory/inventoryStore";
-import { useQuestStore } from "../modules/quest/questStore";
-import { useRelationshipStore } from "../modules/relationship/relationshipStore";
-import { useWorldStore } from "../modules/world/worldStore";
-import { locationCatalog } from "../modules/location/locationCatalog";
-import { timePeriodLabel } from "../modules/time/timeUtils";
+import type { CSSProperties } from "react";
+import { useMemo } from "react";
 
-type HomeScreenProps = {
-  onAction: (actionId: "talk" | "move" | "time" | "save" | "load") => void;
+import { CharacterStage } from "../components/CharacterStage";
+import { StepProgressCard } from "../components/StepProgressCard";
+import { CHARACTER_CLASSES } from "../characters";
+import { theme } from "../constants/theme";
+import { useStepData } from "../data/stepDataProvider";
+import { LAST_UPDATED_LABEL } from "../generated/buildInfo";
+import { buildCharacterViewModel } from "../game/characterState";
+
+const ENERGY_STAGE_LABELS: Record<number, string> = {
+  0: "완전 휴식",
+  1: "졸림",
+  2: "숨 고르기",
+  3: "평온",
+  4: "산책",
+  5: "달리기",
+  6: "최고",
 };
 
-export function HomeScreen({ onAction }: HomeScreenProps) {
-  const character = useCharacterStore();
-  const world = useWorldStore();
-  const dialogue = useDialogueStore();
-  const inventory = useInventoryStore();
-  const relationships = useRelationshipStore();
-  const quests = useQuestStore();
+const BACKGROUND_META: Record<string, { label: string; tone: string }> = {
+  LOW_ENERGY: { label: "조용한 배경", tone: "#f2f0ea" },
+  NORMAL_ENERGY: { label: "편안한 배경", tone: "#eef3f7" },
+  HIGH_ENERGY: { label: "활발한 배경", tone: "#edf8f0" },
+};
 
-  const location = locationCatalog[world.locationId];
-  const currentNpcName = dialogue.selectedNpcId;
-  const latestMessage = dialogue.messages[dialogue.messages.length - 1];
+export function HomeScreen() {
+  const { today, history, goal, admin } = useStepData();
+  const character = useMemo(() => {
+    const baseCharacter = CHARACTER_CLASSES[0];
+    const selectedSkinTone = admin?.skinTones?.find((tone) => tone.id === admin?.skinToneId);
+
+    if (!selectedSkinTone) {
+      return baseCharacter;
+    }
+
+    return {
+      ...baseCharacter,
+      palette: {
+        ...baseCharacter.palette,
+        skin: selectedSkinTone.color,
+      },
+      skinTone: selectedSkinTone.color,
+    };
+  }, [admin?.skinToneId, admin?.skinTones]);
+
+  const viewState = buildCharacterViewModel({ todayRecord: today, history, goal, admin });
+  const currentActionLabel = viewState.currentAction?.label ?? viewState.animationClip ?? "Unknown";
+  const backgroundLabel = BACKGROUND_META[viewState.backgroundState]?.label ?? "현재 배경";
 
   return (
-    <div className="screen screen-home">
-      <div className="screen-title-block">
-        <p className="screen-kicker">Life Online</p>
-        <h2>오늘의 상태</h2>
+    <div style={styles.screen}>
+      <div style={styles.content}>
+        <div style={styles.updatedAt}>{LAST_UPDATED_LABEL}</div>
+
+        <div style={styles.stageWrap}>
+          <CharacterStage character={character} state={viewState} />
+        </div>
+
+        <div style={styles.todayCard}>
+          <div style={styles.cardHeader}>
+            <div style={styles.cardTitle}>오늘 상태</div>
+            <div style={styles.cardPrimary}>{viewState.statusLabel}</div>
+          </div>
+
+          <div style={styles.metaGrid}>
+            <MetaChip icon="⚡" value={`E${viewState.energyLevel} · ${ENERGY_STAGE_LABELS[viewState.energyLevel] ?? "?"}`} />
+            <MetaChip icon="🎯" value={`${Math.round(viewState.progressPercent ?? 0)}%`} />
+            <MetaChip icon="👣" value={`${formatNumber(viewState.steps)}보`} />
+          </div>
+
+          <div style={styles.metaGridBottom}>
+            <MetaLine label="배경" value={backgroundLabel} swatch={BACKGROUND_META[viewState.backgroundState]?.tone} />
+            <MetaLine label="모션" value={currentActionLabel} />
+          </div>
+        </div>
+
+        <StepProgressCard
+          steps={viewState.steps}
+          goal={viewState.goal}
+          progressPercent={viewState.progressPercent}
+          statusLabel={viewState.statusLabel}
+        />
       </div>
-
-      <section className="card stage-card">
-        <div className="card-head">
-          <div>
-            <p className="card-label">Character</p>
-            <h3>{location.name}</h3>
-          </div>
-          <div className="status-pill">
-            {character.emotion} · {character.motion}
-          </div>
-        </div>
-        <CharacterViewer />
-      </section>
-
-      <section className="card info-card">
-        <div className="info-grid">
-          <SummaryStat label="장소" value={location.name} detail={location.flavor} />
-          <SummaryStat label="시간" value={world.currentTimeLabel} detail={timePeriodLabel(world.minutesOfDay)} />
-          <SummaryStat label="대화" value={currentNpcName} detail={latestMessage?.text ?? "대기 중"} />
-          <SummaryStat label="관계" value={`${relationships.npcs.length}명`} detail={`관계 항목 ${relationships.npcs.length}`} />
-        </div>
-      </section>
-
-      <section className="card info-card">
-        <div className="card-head">
-          <div>
-            <p className="card-label">Quick Actions</p>
-            <h3>바로 이어서 하기</h3>
-          </div>
-        </div>
-        <div className="button-grid">
-          <button type="button" className="button" onClick={() => onAction("talk")}>대화</button>
-          <button type="button" className="button" onClick={() => onAction("move")}>장소 이동</button>
-          <button type="button" className="button" onClick={() => onAction("time")}>시간 진행</button>
-          <button type="button" className="button" onClick={() => onAction("save")}>저장</button>
-          <button type="button" className="button" onClick={() => onAction("load")}>불러오기</button>
-        </div>
-      </section>
-
-      <section className="card info-card">
-        <div className="card-head">
-          <div>
-            <p className="card-label">Summary</p>
-            <h3>현재 데이터</h3>
-          </div>
-        </div>
-        <div className="summary-grid">
-          <MiniSummary label="인벤토리" value={`${inventory.items.length}개`} />
-          <MiniSummary label="퀘스트" value={`${quests.quests.length}개`} />
-          <MiniSummary label="관계" value={`${relationships.npcs.length}명`} />
-          <MiniSummary label="대화 로그" value={`${dialogue.messages.length}개`} />
-        </div>
-      </section>
     </div>
   );
 }
 
-function SummaryStat({ label, value, detail }: { label: string; value: string; detail: string }) {
+function MetaChip({ icon, value }: { icon: string; value: string }) {
   return (
-    <div className="summary-stat">
-      <span className="summary-stat-label">{label}</span>
-      <strong className="summary-stat-value">{value}</strong>
-      <p className="summary-stat-detail">{detail}</p>
+    <div style={styles.metaChip}>
+      <div style={styles.metaIcon}>{icon}</div>
+      <div style={styles.metaValue}>{value}</div>
     </div>
   );
 }
 
-function MiniSummary({ label, value }: { label: string; value: string }) {
+function MetaLine({ label, value, swatch = null }: { label: string; value: string; swatch?: string | null }) {
   return (
-    <div className="mini-summary">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div style={styles.metaLine}>
+      <div style={styles.metaLineLabel}>{label}</div>
+      <div style={styles.metaLineValueRow}>
+        {swatch ? <div style={{ ...styles.metaSwatch, backgroundColor: swatch }} /> : null}
+        <div style={styles.metaLineValue}>{value}</div>
+      </div>
     </div>
   );
 }
+
+function formatNumber(value: number) {
+  return Number(value ?? 0).toLocaleString("ko-KR");
+}
+
+const styles: Record<string, CSSProperties> = {
+  screen: {
+    flex: 1,
+    backgroundColor: theme.colors.appBackground,
+  },
+  content: {
+    padding: "6px 16px 16px",
+    display: "grid",
+    gap: theme.spacing.md,
+  },
+  updatedAt: {
+    alignSelf: "flex-end",
+    color: theme.colors.muted,
+    fontSize: 11,
+    fontWeight: 700,
+  },
+  stageWrap: {
+    marginTop: 0,
+    marginLeft: -6,
+    marginRight: -6,
+  },
+  todayCard: {
+    borderRadius: theme.radius.xl,
+    padding: 18,
+    backgroundColor: "rgba(255,255,255,0.88)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(215, 198, 176, 0.9)",
+    display: "grid",
+    gap: 12,
+  },
+  cardHeader: {
+    display: "grid",
+    gap: 4,
+  },
+  cardTitle: {
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: 800,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  cardPrimary: {
+    color: theme.colors.ink,
+    fontSize: 28,
+    lineHeight: "34px",
+    fontWeight: 900,
+  },
+  metaGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  metaChip: {
+    flex: 1,
+    minWidth: "30%",
+    borderRadius: theme.radius.lg,
+    padding: "10px 12px",
+    backgroundColor: "#fffdf9",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: theme.colors.border,
+    display: "grid",
+    gap: 4,
+  },
+  metaIcon: {
+    fontSize: 14,
+    fontWeight: 900,
+  },
+  metaValue: {
+    color: theme.colors.ink,
+    fontSize: 12,
+    lineHeight: "17px",
+    fontWeight: 900,
+  },
+  metaGridBottom: {
+    display: "flex",
+    gap: 10,
+  },
+  metaLine: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 4,
+  },
+  metaLineLabel: {
+    color: theme.colors.inkSoft,
+    fontSize: 10,
+    fontWeight: 800,
+  },
+  metaLineValueRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+  },
+  metaLineValue: {
+    color: theme.colors.ink,
+    fontSize: 12,
+    fontWeight: 900,
+    minWidth: 0,
+  },
+  metaSwatch: {
+    width: 16,
+    height: 16,
+    borderRadius: 999,
+    border: "1px solid rgba(0,0,0,0.08)",
+    flex: "0 0 auto",
+  },
+};
