@@ -3,7 +3,7 @@ import { useDialogueStore } from "../dialogue/dialogueStore";
 import { useInventoryStore } from "../inventory/inventoryStore";
 import { useQuestStore } from "../quest/questStore";
 import { useRelationshipStore } from "../relationship/relationshipStore";
-import { useWorldStore } from "../world/worldStore";
+import { useWorldStore, WorldEvent } from "../world/worldStore";
 import { CharacterAppearance, CharacterEmotion, CharacterMotion } from "../character/types";
 import { DialogueMessage } from "../dialogue/types";
 import { getCurrentTimeLabel, getDateLabel } from "../time/timeUtils";
@@ -37,6 +37,7 @@ export type WorldSaveData = {
   locationId: ReturnType<typeof useWorldStore.getState>["locationId"];
   currentDateISO: string;
   minutesOfDay: number;
+  events: WorldEvent[];
 };
 
 export type GameSnapshot = {
@@ -78,7 +79,8 @@ export function buildGameSnapshot(): GameSnapshot {
     world: {
       locationId: world.locationId,
       currentDateISO: world.currentDateISO,
-      minutesOfDay: world.minutesOfDay
+      minutesOfDay: world.minutesOfDay,
+      events: world.events
     }
   };
 }
@@ -113,9 +115,12 @@ export function restoreGameSnapshot(snapshot: GameSnapshot) {
     locationId: snapshot.world.locationId,
     currentDateISO: snapshot.world.currentDateISO,
     minutesOfDay: snapshot.world.minutesOfDay,
+    events: snapshot.world.events ?? [],
     currentDateLabel: getDateLabel(snapshot.world.currentDateISO),
     currentTimeLabel: getCurrentTimeLabel(snapshot.world.minutesOfDay),
     setLocation: useWorldStore.getState().setLocation,
-    advanceTime: useWorldStore.getState().advanceTime
+    advanceTime: useWorldStore.getState().advanceTime,
+    logEvent: useWorldStore.getState().logEvent,
+    clearEvents: useWorldStore.getState().clearEvents
   });
 }

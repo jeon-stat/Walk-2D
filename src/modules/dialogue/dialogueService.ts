@@ -1,17 +1,19 @@
 import { CharacterEmotion } from "../character/types";
 import { DialogueActionId, DialogueResult } from "./types";
-import { dialoguePresets, npcCatalog } from "./mockDialogues";
+import { dialoguePresets, npcCatalog } from "./dialogueSeed";
 
 export const dialogueService = {
   getGreeting(npcId: string) {
-    return dialoguePresets[npcId]?.greeting ?? {
-      systemLine: "알 수 없는 NPC가 응답했습니다.",
-      npcLine: "안녕. 편하게 말을 걸어도 좋아.",
-      emotion: "normal" as CharacterEmotion
-    };
+    return (
+      dialoguePresets[npcId]?.greeting ?? {
+        systemLine: "알 수 없는 NPC가 응답했습니다.",
+        npcLine: "안녕. 편하게 말을 걸어도 좋아.",
+        emotion: "normal" as CharacterEmotion
+      }
+    );
   },
 
-  runMockDialogue({
+  runSeedDialogue({
     npcId,
     actionId
   }: {

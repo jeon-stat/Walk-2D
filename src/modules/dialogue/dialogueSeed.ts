@@ -15,7 +15,10 @@ export const dialoguePresets: Record<
   string,
   {
     greeting: { systemLine: string; npcLine: string; emotion: CharacterEmotion };
-    actions: Record<string, { playerLine: string; npcLine: string; emotion: CharacterEmotion; affinityDelta: number; questProgressDelta: number }>;
+    actions: Record<
+      string,
+      { playerLine: string; npcLine: string; emotion: CharacterEmotion; affinityDelta: number; questProgressDelta: number }
+    >;
   }
 > = {
   mina: {

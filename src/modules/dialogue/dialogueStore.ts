@@ -9,15 +9,15 @@ type DialogueStore = {
   clearMessages: () => void;
 };
 
+const seedMessage: DialogueMessage = {
+  id: "seed-1",
+  speaker: "system",
+  text: "대화를 시작하면 여기에 기록이 쌓입니다."
+};
+
 export const useDialogueStore = create<DialogueStore>((set) => ({
   selectedNpcId: "mina",
-  messages: [
-    {
-      id: "seed-1",
-      speaker: "system",
-      text: "대화를 시작하면 mock 응답이 여기에 쌓입니다."
-    }
-  ],
+  messages: [seedMessage],
   setSelectedNpcId: (npcId) => set({ selectedNpcId: npcId }),
   pushMessage: (message) =>
     set((state) => ({
@@ -31,12 +31,6 @@ export const useDialogueStore = create<DialogueStore>((set) => ({
     })),
   clearMessages: () =>
     set({
-      messages: [
-        {
-          id: "seed-1",
-          speaker: "system",
-          text: "대화를 시작하면 mock 응답이 여기에 쌓입니다."
-        }
-      ]
+      messages: [seedMessage]
     })
 }));
