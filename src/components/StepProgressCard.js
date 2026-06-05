@@ -1,0 +1,94 @@
+import { StyleSheet, Text, View } from "react-native";
+
+import { theme } from "../constants/theme.js";
+
+export function StepProgressCard({ steps, goal, progressPercent, statusLabel }) {
+  const progressWidth = `${Math.max(0, Math.min(progressPercent, 100))}%`;
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Text style={styles.title}>오늘</Text>
+        <Text style={styles.status}>{statusLabel}</Text>
+      </View>
+
+      <View style={styles.valueRow}>
+        <Text style={styles.steps}>{steps.toLocaleString()}</Text>
+        <Text style={styles.goal}>/ {goal.toLocaleString()}보</Text>
+      </View>
+
+      <View style={styles.track}>
+        <View style={[styles.fill, { width: progressWidth }]} />
+      </View>
+
+      <Text style={styles.caption}>{Math.round(progressPercent)}%</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    color: theme.colors.ink,
+    fontSize: 16,
+    fontWeight: "900",
+    fontFamily: theme.fonts.display,
+  },
+  status: {
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "800",
+    fontFamily: theme.fonts.body,
+  },
+  valueRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginTop: 10,
+  },
+  steps: {
+    color: theme.colors.ink,
+    fontSize: 32,
+    fontWeight: "900",
+    letterSpacing: -1,
+    fontFamily: theme.fonts.display,
+  },
+  goal: {
+    marginLeft: 6,
+    marginBottom: 4,
+    color: theme.colors.muted,
+    fontSize: 14,
+    fontWeight: "800",
+    fontFamily: theme.fonts.body,
+  },
+  track: {
+    marginTop: 14,
+    height: 10,
+    borderRadius: theme.radius.pill,
+    overflow: "hidden",
+    backgroundColor: "#efefed",
+  },
+  fill: {
+    height: "100%",
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.ink,
+  },
+  caption: {
+    marginTop: 8,
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "700",
+    fontFamily: theme.fonts.body,
+  },
+});

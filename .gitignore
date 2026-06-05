@@ -1,8 +1,6 @@
-node_modules
-dist
-.DS_Store
+node_modules/
+.expo/
+dist/
+.npm-cache/
+_expo_scaffold/
 *.log
-coverage
-.vite
-/.github/_temp
-*.tsbuildinfo

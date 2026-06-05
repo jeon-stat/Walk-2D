@@ -1,17 +1,37 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Walk-2D | Life Online 2D Edition</title>
-    <meta
-      name="description"
-      content="Life Online의 화면, UX, 데이터 흐름은 유지하고 캐릭터만 2D 파츠 조합 방식으로 바꾼 Walk-2D."
-    />
-    <script type="module" crossorigin src="/Walk-2D/assets/index-BpFw0zop.js"></script>
-    <link rel="stylesheet" crossorigin href="/Walk-2D/assets/index-6kH2QqhA.css">
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Walk-2D</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
   </head>
+
   <body>
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <!-- The root element for your Expo app. -->
     <div id="root"></div>
-  </body>
+  <script src="/Walk-2D/_expo/static/js/web/AppEntry-25903e3846816a0672829729f442eb40.js" defer></script>
+</body>
 </html>
