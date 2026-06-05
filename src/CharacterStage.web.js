@@ -1,82 +1,69 @@
-import { Suspense, useMemo, useRef, useState } from "react";
-import { PanResponder, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
-import { GLBCharacterModel } from "./models/GLBCharacterModel.js";
-import { PongoModel } from "./models/PongoModel.js";
-import { StageCanvas } from "./scene/StageCanvas.web.js";
-import { StageRig } from "./scene/StageRig.js";
-import { getRotationFromDrag } from "./scene/rotationMath.js";
-import { STAGE_LAYOUT } from "./scene/stageConfig.js";
+import basicCharacterPng from "./assets/character/basic-character.png";
+import { theme } from "./constants/theme.js";
 
-export function CharacterStage({ character, onInteractionChange }) {
-  const [rotation, setRotation] = useState(STAGE_LAYOUT.defaultRotation);
-  const rotationRef = useRef(STAGE_LAYOUT.defaultRotation);
-  const dragStartRef = useRef(STAGE_LAYOUT.defaultRotation);
-
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (_, gestureState) =>
-          Math.abs(gestureState.dx) > 3 || Math.abs(gestureState.dy) > 3,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: () => {
-          dragStartRef.current = rotationRef.current;
-          onInteractionChange?.(true);
-        },
-        onPanResponderMove: (_, gestureState) => {
-          const nextRotation = getRotationFromDrag(
-            dragStartRef.current,
-            gestureState,
-            STAGE_LAYOUT.rotationLimit,
-          );
-
-          rotationRef.current = nextRotation;
-          setRotation(nextRotation);
-        },
-        onPanResponderRelease: () => {
-          onInteractionChange?.(false);
-        },
-        onPanResponderTerminate: () => {
-          onInteractionChange?.(false);
-        },
-      }),
-    [onInteractionChange],
-  );
-
+export function CharacterStage({ character }) {
   return (
-    <View style={styles.stage}>
-      <StageCanvas>
-        <StageRig rotation={rotation}>
-          <Suspense fallback={null}>
-            {character.modelUrl ? (
-              <GLBCharacterModel character={character} />
-            ) : (
-              <PongoModel character={character} />
-            )}
-          </Suspense>
-        </StageRig>
-      </StageCanvas>
-      <View style={styles.gestureHotspot} {...panResponder.panHandlers} />
+    <View style={styles.shell}>
+      <View style={styles.stage}>
+        <Image
+          source={basicCharacterPng}
+          alt={character?.label ?? "Character"}
+          resizeMode="contain"
+          style={styles.image}
+        />
+      </View>
+
+      <View style={styles.captionWrap}>
+        <Text style={styles.name}>{character?.label ?? "Character"}</Text>
+        <Text style={styles.copy}>2D basic PNG character</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shell: {
+    height: 340,
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: "#000000",
+  },
   stage: {
     flex: 1,
-    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
   },
-  gestureHotspot: {
+  image: {
+    width: "100%",
+    height: "100%",
+    maxWidth: 250,
+    maxHeight: 300,
+  },
+  captionWrap: {
     position: "absolute",
-    left: "50%",
-    top: 20,
-    width: 270,
-    height: 320,
-    marginLeft: -135,
-    backgroundColor: "transparent",
-    cursor: "grab",
-    touchAction: "none",
-    userSelect: "none",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  name: {
+    color: "#ffffff",
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  copy: {
+    marginTop: 4,
+    color: "rgba(255,255,255,0.72)",
+    fontSize: 13,
+    fontWeight: "700",
   },
 });

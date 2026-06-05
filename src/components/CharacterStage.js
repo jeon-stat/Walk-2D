@@ -1,13 +1,23 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
+import basicCharacterPng from "../assets/character/basic-character.png";
 import { theme } from "../constants/theme.js";
 
 export function CharacterStage({ character }) {
   return (
     <View style={styles.shell}>
-      <View style={styles.placeholder}>
-        <Text style={styles.name}>{character.label}</Text>
-        <Text style={styles.copy}>3D 미리보기는 웹에서 확인할 수 있어요.</Text>
+      <View style={styles.stage}>
+        <Image
+          source={basicCharacterPng}
+          alt={character?.label ?? "Character"}
+          resizeMode="contain"
+          style={styles.image}
+        />
+      </View>
+
+      <View style={styles.captionWrap}>
+        <Text style={styles.name}>{character?.label ?? "Character"}</Text>
+        <Text style={styles.copy}>2D basic PNG character</Text>
       </View>
     </View>
   );
@@ -16,26 +26,44 @@ export function CharacterStage({ character }) {
 const styles = StyleSheet.create({
   shell: {
     height: 340,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "transparent",
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: "#000000",
   },
-  placeholder: {
+  stage: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 24,
+    padding: 16,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    maxWidth: 250,
+    maxHeight: 300,
+  },
+  captionWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 12,
+    backgroundColor: "rgba(0,0,0,0.8)",
   },
   name: {
-    color: theme.colors.ink,
-    fontSize: 24,
+    color: "#ffffff",
+    fontSize: 20,
     fontWeight: "900",
   },
   copy: {
-    marginTop: 10,
-    color: theme.colors.inkSoft,
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
+    marginTop: 4,
+    color: "rgba(255,255,255,0.72)",
+    fontSize: 13,
     fontWeight: "700",
   },
 });
